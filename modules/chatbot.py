@@ -97,7 +97,8 @@ def get_chatbot_response_agent(query, user_id,channel_id,session_id, history=Non
     )
     # gpt-4-1106-preview
     # gpt-35-turbo-16k
-    llm = ChatOpenAI(temperature=0.4, streaming=True, model="gpt-4-1106-preview",max_retries=7 )
+    # gpt-3.5-turbo
+    llm = ChatOpenAI(temperature=0.4, streaming=True, model="gpt-3.5-turbo",max_retries=7 )
 
     agent = OpenAIFunctionsAgent(llm=llm, tools=tools, prompt=prompt)
     agent_executor = AgentExecutor(
