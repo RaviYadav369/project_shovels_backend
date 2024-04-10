@@ -194,7 +194,7 @@ def users():
     
 # add youtube channel
 @app.route('/add_channel', methods=['POST'])
-@cross_origin(origin='*', headers=['Content-Type', 'application/json'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def add_channel():
     # take channel url from request
     channel_url = request.json['channel_url']
@@ -224,7 +224,7 @@ def add_channel():
     
     # list of channels for a user
 @app.route('/channels', methods=['POST'])
-@cross_origin(origin='*', headers=['Content-Type', 'application/json'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def channels():
     # take user id from request
     user_id = request.json['user_id']
@@ -235,7 +235,7 @@ def channels():
 
 # delete channel and all itss transcripts
 @app.route('/delete_channel', methods=['POST'])
-@cross_origin(origin='*', headers=['Content-Type', 'application/json'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
 def delete_channel():
     # take channel id from request
     channel_id = request.json['channel_id']
