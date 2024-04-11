@@ -160,21 +160,21 @@ def handle_webhook():
             return jsonify({'message':"Error occured in verifying", 'status_code':400})
     
         event_type = evt.type
-        print("veriFicaTion")
+        print("veriFicaTion",event_type)
         print(evt)
         
-        if event_type == "user.created":
-            # Extract relevant information
-            clerk_id = evt.data["id"]
-            email = evt.data["email_addresses"][0]["email_address"]
-            first_name = evt.data["first_name"]
-            last_name = evt.data["last_name"]
-            profile_image_url = evt.data.get("profile_image_url", "")
+        # if event_type == "user.created":
+        #     # Extract relevant information
+        #     clerk_id = evt.data["id"]
+        #     email = evt.data["email_addresses"][0]["email_address"]
+        #     first_name = evt.data["first_name"]
+        #     last_name = evt.data["last_name"]
+        #     profile_image_url = evt.data.get("profile_image_url", "")
 
-            # Use the register_user function to insert/update the user in the database
-            user_id = register_user(clerk_id, email, first_name, last_name, profile_image_url)
+        #     # Use the register_user function to insert/update the user in the database
+        #     user_id = register_user(clerk_id, email, first_name, last_name, profile_image_url)
             
-            return jsonify({'message': "User created event processed successfully", 'user_id': user_id, 'status_code': 200})
+        #     return jsonify({'message': "User created event processed successfully", 'user_id': user_id, 'status_code': 200})
     except Exception as e:
           print("Error Occured",e)
           return jsonify({'message': "Error occurred", 'status_code' : 400})
