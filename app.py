@@ -148,7 +148,7 @@ def handle_webhook():
 
         print('svix ids',svix_id, svix_timestamp, svix_signature,user_agent)
         body = request.get_json()
-        # body = json.dumps(body)
+        body = json.dumps(body)
         print("BoDy",body)
         print("Headers",headers)
         
