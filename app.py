@@ -197,7 +197,7 @@ class Webhook:
             message.encode("utf-8"),
             hashlib.sha256
         ).hexdigest()
-
+        print("signature",signature,headers["svix-signature"])
         if signature != headers["svix-signature"]:
             raise WebhookVerificationError("Invalid signature")
 
