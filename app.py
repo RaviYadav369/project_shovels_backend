@@ -60,9 +60,12 @@ def handle_webhook():
         if not WEBHOOK_SECRET:
             raise Exception("Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local")
 
-        svix_id = headers.get("Svix-Id")
-        svix_timestamp = headers.get("Svix-Timestamp")
-        svix_signature = headers.get("Svix-Signature")
+        # svix_id = headers.get("Svix-Id")
+        # svix_timestamp = headers.get("Svix-Timestamp")
+        # svix_signature = headers.get("Svix-Signature")
+        svix_id = headers.get("svix-id")
+        svix_timestamp = headers.get("svix-timestamp")
+        svix_signature = headers.get("svix-signature")
         user_agent = headers.get("User-Agent")
 
         if not svix_id or not svix_timestamp or not svix_signature:
@@ -74,13 +77,9 @@ def handle_webhook():
         print("BoDy",body)
         print("Headers",headers)
         
-        # body = body['decoded']['data']['payload']
-        # svix_id = headers['decoded']['data']['metadata']['Svix-Id']
-        # svix_timestamp = headers['decoded']['data']['metadata']['Svix-Signature']
-        # svix_signature = str(headers['decoded']['data']['metadata']['Svix-Timestamp'])
         try:
             wh = Webhook(WEBHOOK_SECRET)
-            evt = wh.verify(body,headers)
+            evt = wh.verify(data=body,headers=headers)
         except Exception as e:
             print(f"Error verifying webhook: {e}")
             return jsonify({'message':"Error occured in verifying", 'status_code':400})
@@ -105,30 +104,30 @@ def handle_webhook():
           print("Error Occured")
           return jsonify({'message': "Error occurred", 'status_code' : 400})
        
-# class Webhook:
-#     def _init_(self, secret):
-#         self.secret = secret.encode("utf-8")
+class Webhook:
+    def _init_(self, secret):
+        self.secret = secret.encode("utf-8")
 
-#     def verify(self, body, headers):
-#         data = json.dumps(body, sort_keys=True).encode("utf-8")
+    def verify(self, body, headers):
+        data = json.dumps(body, sort_keys=True).encode("utf-8")
 
-#         timestamp = int(headers["svix-timestamp"])
+        timestamp = int(headers["svix-timestamp"])
 
-#         if (datetime.now().timestamp() - timestamp) > 60:
-#             raise Exception("Timestamp is too old")
+        if (datetime.now().timestamp() - timestamp) > 60:
+            raise Exception("Timestamp is too old")
 
-#         message = f"{data}\n{timestamp}\n{self.secret}"
+        message = f"{data}\n{timestamp}\n{self.secret}"
 
-#         signature = hmac.new(
-#             self.secret,
-#             message.encode("utf-8"),
-#             hashlib.sha256
-#         ).hexdigest()
+        signature = hmac.new(
+            self.secret,
+            message.encode("utf-8"),
+            hashlib.sha256
+        ).hexdigest()
 
-#         if signature != headers["svix-signature"]:
-#             raise Exception("Invalid signature")
+        if signature != headers["svix-signature"]:
+            raise Exception("Invalid signature")
 
-#         return json.loads(body)
+        return json.loads(body)
 
 # login
 @app.route('/login', methods=['POST'])
