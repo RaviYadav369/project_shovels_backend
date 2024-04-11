@@ -176,7 +176,7 @@ def handle_webhook():
             
             return jsonify({'message': "User created event processed successfully", 'user_id': user_id, 'status_code': 200})
     except Exception as e:
-          print("Error Occured")
+          print("Error Occured",e)
           return jsonify({'message': "Error occurred", 'status_code' : 400})
        
 class Webhook:
