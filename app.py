@@ -52,6 +52,83 @@ def index():
     return jsonify({"message": "Welcome to the Shovel YT Chatbot API"})
 
 @app.route("/webhook", methods=["POST"])
+# def handle_webhook():
+#     try:
+#         headers = request.headers
+#         WEBHOOK_SECRET = os.environ["WEBHOOK_SECRET"]
+
+#         if not WEBHOOK_SECRET:
+#             raise Exception("Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local")
+
+#         # svix_id = headers.get("Svix-Id")
+#         # svix_timestamp = headers.get("Svix-Timestamp")
+#         # svix_signature = headers.get("Svix-Signature")
+#         svix_id = headers.get("svix-id")
+#         svix_timestamp = headers.get("svix-timestamp")
+#         svix_signature = headers.get("svix-signature")
+#         user_agent = headers.get("User-Agent")
+
+#         if not svix_id or not svix_timestamp or not svix_signature:
+#             return jsonify({'message':"Error occured -- no svix headers", 'status_code':400})
+
+#         print('svix ids',svix_id, svix_timestamp, svix_signature,user_agent)
+#         body = request.get_json()
+#         body = json.dumps(body)
+#         print("BoDy",body)
+#         print("Headers",headers)
+        
+#         try:
+#             wh = Webhook(WEBHOOK_SECRET)
+#             evt = wh.verify(data=body,headers=headers)
+#         except Exception as e:
+#             print(f"Error verifying webhook: {e}")
+#             return jsonify({'message':"Error occured in verifying", 'status_code':400})
+    
+#         event_type = evt.type
+#         print("veriFicaTion")
+#         print(evt)
+        
+#         if event_type == "user.created":
+#             # Extract relevant information
+#             clerk_id = evt.data["id"]
+#             email = evt.data["email_addresses"][0]["email_address"]
+#             first_name = evt.data["first_name"]
+#             last_name = evt.data["last_name"]
+#             profile_image_url = evt.data.get("profile_image_url", "")
+
+#             # Use the register_user function to insert/update the user in the database
+#             user_id = register_user(clerk_id, email, first_name, last_name, profile_image_url)
+            
+#             return jsonify({'message': "User created event processed successfully", 'user_id': user_id, 'status_code': 200})
+#     except Exception as e:
+#           print("Error Occured")
+#           return jsonify({'message': "Error occurred", 'status_code' : 400})
+       
+# class Webhook:
+#     def _init_(self, secret):
+#         self.secret = secret.encode("utf-8")
+
+#     def verify(self, body, headers):
+#         data = json.dumps(body, sort_keys=True).encode("utf-8")
+
+#         timestamp = int(headers["svix-timestamp"])
+
+#         if (datetime.now().timestamp() - timestamp) > 60:
+#             raise Exception("Timestamp is too old")
+
+#         message = f"{data}\n{timestamp}\n{self.secret}"
+
+#         signature = hmac.new(
+#             self.secret,
+#             message.encode("utf-8"),
+#             hashlib.sha256
+#         ).hexdigest()
+
+#         if signature != headers["svix-signature"]:
+#             raise Exception("Invalid signature")
+
+#         return json.loads(body)
+
 def handle_webhook():
     try:
         headers = request.headers
@@ -60,9 +137,6 @@ def handle_webhook():
         if not WEBHOOK_SECRET:
             raise Exception("Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local")
 
-        # svix_id = headers.get("Svix-Id")
-        # svix_timestamp = headers.get("Svix-Timestamp")
-        # svix_signature = headers.get("Svix-Signature")
         svix_id = headers.get("svix-id")
         svix_timestamp = headers.get("svix-timestamp")
         svix_signature = headers.get("svix-signature")
@@ -80,7 +154,7 @@ def handle_webhook():
         try:
             wh = Webhook(WEBHOOK_SECRET)
             evt = wh.verify(data=body,headers=headers)
-        except Exception as e:
+        except WebhookVerificationError as e:
             print(f"Error verifying webhook: {e}")
             return jsonify({'message':"Error occured in verifying", 'status_code':400})
     
@@ -105,16 +179,16 @@ def handle_webhook():
           return jsonify({'message': "Error occurred", 'status_code' : 400})
        
 class Webhook:
-    def _init_(self, secret):
+    def __init__(self, secret):
         self.secret = secret.encode("utf-8")
 
-    def verify(self, body, headers):
-        data = json.dumps(body, sort_keys=True).encode("utf-8")
+    def verify(self, data, headers):
+        data = json.dumps(data, sort_keys=True).encode("utf-8")
 
         timestamp = int(headers["svix-timestamp"])
 
         if (datetime.now().timestamp() - timestamp) > 60:
-            raise Exception("Timestamp is too old")
+            raise WebhookVerificationError("Timestamp is too old")
 
         message = f"{data}\n{timestamp}\n{self.secret}"
 
@@ -125,9 +199,9 @@ class Webhook:
         ).hexdigest()
 
         if signature != headers["svix-signature"]:
-            raise Exception("Invalid signature")
+            raise WebhookVerificationError("Invalid signature")
 
-        return json.loads(body)
+        return json.loads(data)
 
 # login
 @app.route('/login', methods=['POST'])
