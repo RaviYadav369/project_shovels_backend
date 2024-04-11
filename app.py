@@ -180,35 +180,34 @@ def handle_webhook():
           print("Error Occured",e)
           return jsonify({'message': "Error occurred", 'status_code' : 400})
        
-def verify(self, data, headers):
-    svix_id = headers.get("svix-id")
-    svix_timestamp = headers.get("svix-timestamp")
+class Webhook:
+    def __init__(self, secret):
+        self.secret = secret.encode("utf-8")
 
-    signed_content = f"{svix_id}.{svix_timestamp}.{data}"
+    def verify(self, data, headers):
+        svix_id = headers.get("svix-id")
+        svix_timestamp = headers.get("svix-timestamp")
 
-    # Decode the secret from base64 and encode as bytes
-    secret_bytes = base64.b64decode(self.secret.split("_")[1]).encode()
+        signed_content = f"{svix_id}.{svix_timestamp}.{data}"
 
-    # Compute the expected signature
-    signature = hmac.new(
-        secret_bytes,
-        signed_content.encode("utf-8"),
-        hashlib.sha256
-    ).digest()
+        # Decode the secret from base64 and encode as bytes
+        secret_bytes = base64.b64decode(self.secret.split("_")[1]).encode()
 
-    # Convert the expected signature to base64
-    expected_signature = base64.b64encode(signature).decode("utf-8")
-    print("Expected Signature",expected_signature,headers["svix-signature"])
-    # Compare the expected signature to the actual signature
-    if expected_signature!= headers["svix-signature"]:
-        raise WebhookVerificationError("Invalid signature")
+        # Compute the expected signature
+        signature = hmac.new(
+            secret_bytes,
+            signed_content.encode("utf-8"),
+            hashlib.sha256
+        ).digest()
 
-    # Extract the data value as a string
-    data_str = json.dumps(data)
+        # Convert the expected signature to base64
+        expected_signature = base64.b64encode(signature).decode("utf-8")
+        print("Expected Signature",expected_signature,headers["svix-signature"])
+        # Compare the expected signature to the actual signature
+        if expected_signature!= headers["svix-signature"]:
+            raise WebhookVerificationError("Invalid signature")
 
-    # Parse the data value as JSON
-    return json.loads(data_str)
-
+        return json.loads(data)
 # login
 @app.route('/login', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
