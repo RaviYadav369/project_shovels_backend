@@ -148,7 +148,7 @@ def handle_webhook():
 
         print('svix ids',svix_id, svix_timestamp, svix_signature,user_agent)
         body = request.get_json()
-        # body = json.dumps(body)
+        body = json.dumps(body)
         print("BoDy",body)
         print("Headers",headers)
         
@@ -203,7 +203,11 @@ def verify(self, data, headers):
     if expected_signature!= headers["svix-signature"]:
         raise WebhookVerificationError("Invalid signature")
 
-    return json.loads(data)
+    # Extract the data value as a string
+    data_str = json.dumps(data)
+
+    # Parse the data value as JSON
+    return json.loads(data_str)
 
 # login
 @app.route('/login', methods=['POST'])
