@@ -25,6 +25,13 @@ import hmac
 import base64
 import hashlib
 from datetime import datetime
+import base64
+import hashlib
+import hmac
+import json
+import typing as t
+from datetime import datetime, timedelta, timezone
+from math import floor
 
 load_dotenv()
 
@@ -179,35 +186,77 @@ def handle_webhook():
     except Exception as e:
           print("Error Occured",e)
           return jsonify({'message': "Error occurred", 'status_code' : 400})
-       
+def hmac_data(key: bytes, data: bytes) -> bytes:
+    return hmac.new(key, data, hashlib.sha256).digest()
+
+
+class WebhookVerificationError(Exception):
+    pass    
 class Webhook:
-    def __init__(self, secret):
-        self.secret = secret.encode("utf-8")
+    _SECRET_PREFIX: str = "whsec_"
+    _whsecret: bytes
 
-    def verify(self, data, headers):
-        svix_id = headers.get("svix-id")
-        svix_timestamp = headers.get("svix-timestamp")
+    def __init__(self, whsecret: t.Union[str, bytes]):
+        if not whsecret:
+            raise RuntimeError("Secret can't be empty.")
 
-        signed_content = f"{svix_id}.{svix_timestamp}.{data}"
+        if isinstance(whsecret, str):
+            if whsecret.startswith(self._SECRET_PREFIX):
+                whsecret = whsecret[len(self._SECRET_PREFIX) :]
+            self._whsecret = base64.b64decode(whsecret)
 
-        # Decode the secret from base64 and encode as bytes
-        secret_bytes = base64.b64decode(self.secret.split("_")[1]).encode()
+        if isinstance(whsecret, bytes):
+            self._whsecret = whsecret
 
-        # Compute the expected signature
-        signature = hmac.new(
-            secret_bytes,
-            signed_content.encode("utf-8"),
-            hashlib.sha256
-        ).digest()
+    def verify(self, data: t.Union[bytes, str], headers: t.Dict[str, str]) -> t.Any:
+        data = data if isinstance(data, str) else data.decode()
+        headers = {k.lower(): v for (k, v) in headers.items()}
+        msg_id = headers.get("svix-id")
+        msg_signature = headers.get("svix-signature")
+        msg_timestamp = headers.get("svix-timestamp")
+        if not (msg_id and msg_timestamp and msg_signature):
+            msg_id = headers.get("webhook-id")
+            msg_signature = headers.get("webhook-signature")
+            msg_timestamp = headers.get("webhook-timestamp")
+            if not (msg_id and msg_timestamp and msg_signature):
+                raise WebhookVerificationError("Missing required headers")
 
-        # Convert the expected signature to base64
-        expected_signature = base64.b64encode(signature).decode("utf-8")
-        print("Expected Signature",expected_signature,headers["svix-signature"])
-        # Compare the expected signature to the actual signature
-        if expected_signature!= headers["svix-signature"]:
-            raise WebhookVerificationError("Invalid signature")
+        timestamp = self.__verify_timestamp(msg_timestamp)
 
-        return json.loads(data)
+        expected_sig = base64.b64decode(self.sign(msg_id=msg_id, timestamp=timestamp, data=data).split(",")[1])
+        passed_sigs = msg_signature.split(" ")
+        
+        for versioned_sig in passed_sigs:
+            (version, signature) = versioned_sig.split(",")
+            if version != "v1":
+                continue
+            sig_bytes = base64.b64decode(signature)
+            print("SiGn ;",sig_bytes,expected_sig)
+            if hmac.compare_digest(expected_sig, sig_bytes):
+                return json.loads(data)
+
+        raise WebhookVerificationError("No matching signature found")
+
+    def sign(self, msg_id: str, timestamp: datetime, data: str) -> str:
+        timestamp_str = str(floor(timestamp.replace(tzinfo=timezone.utc).timestamp()))
+        to_sign = f"{msg_id}.{timestamp_str}.{data}".encode()
+        signature = hmac_data(self._whsecret, to_sign)
+        return f"v1,{base64.b64encode(signature).decode('utf-8')}"
+
+    def __verify_timestamp(self, timestamp_header: str) -> datetime:
+        webhook_tolerance = timedelta(minutes=5)
+        now = datetime.now(tz=timezone.utc)
+        try:
+            timestamp = datetime.fromtimestamp(float(timestamp_header), tz=timezone.utc)
+        except Exception:
+            raise WebhookVerificationError("Invalid Signature Headers")
+
+        if timestamp < (now - webhook_tolerance):
+            raise WebhookVerificationError("Message timestamp too old")
+        if timestamp > (now + webhook_tolerance):
+            raise WebhookVerificationError("Message timestamp too new")
+        return timestamp
+
 # login
 @app.route('/login', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
