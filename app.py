@@ -25,10 +25,8 @@ import hmac
 import base64
 import hashlib
 from datetime import datetime
-import base64
-import hashlib
-import hmac
 import json
+from zoneinfo import ZoneInfo
 import typing as t
 from datetime import datetime, timedelta, timezone
 from math import floor
@@ -245,14 +243,18 @@ class Webhook:
 
         raise WebhookVerificationError("No matching signature found")
 
+    def generateSignature(whsecret, toSign):
+        hmac = hmac.new(whsecret.encode(), toSign.encode(), digestmod=hashlib.sha256)
+        signature = hmac.digest()
+        return base64.b64encode(signature).decode('utf-8')
+
     def sign(self, msg_id: str, timestamp: datetime, data: str) -> str:
-        timestamp_str = str(floor(timestamp.replace(tzinfo=timezone.utc).timestamp()))
-        print('from siGn:',self._whsecret,msg_id,timestamp_str)
+        timestamp_str = str(int(timestamp.replace(tzinfo=ZoneInfo('UTC')).timestamp()))
+        print('from sign function',msg_id,timestamp_str)
         to_sign = f"{msg_id}.{timestamp_str}.{data}".encode()
-        # print('from sign function to_sign',to_sign)
-        signature = hmac_data(self._whsecret, to_sign)
-        print('this is generated signature',signature)
-        return f"v1,{base64.b64encode(signature).decode('utf-8')}"
+        signature = self.generateSignature(self._whsecret, to_sign)
+        print('generated Signature',signature)
+        return f"v1,{signature}"
 
     def __verify_timestamp(self, timestamp_header: str) -> datetime:
         webhook_tolerance = timedelta(minutes=5)
