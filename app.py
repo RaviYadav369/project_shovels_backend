@@ -229,15 +229,15 @@ class Webhook:
                 raise WebhookVerificationError("Missing required headers")
         timestamp = self.__verify_timestamp(msg_timestamp)
 
-        print('Inside Verify function',msg_id,msg_signature, msg_timestamp)
-        to_sign = f"{msg_id}.{timestamp}".encode()
+        expected_sig = base64.b64decode(self.sign(msg_id=msg_id, timestamp=timestamp, data=data).split(",")[1])
+        print('comming From the signaTure',self.sign(msg_id=msg_id, timestamp=timestamp, data=data).split(",")[1])
         passed_sigs = msg_signature.split(" ")
         for versioned_sig in passed_sigs:
             (version, signature) = versioned_sig.split(",")
             if version != "v1":
                 continue
             sig_bytes = base64.b64decode(signature)
-            if Webhook.generateSignature(self._whsecret, to_sign) == sig_bytes:
+            if expected_sig == sig_bytes:
                 return json.loads(data)
 
         raise WebhookVerificationError("No matching signature found")
