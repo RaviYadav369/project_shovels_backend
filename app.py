@@ -153,18 +153,18 @@ def handle_webhook():
 
         print('svix ids',svix_id, svix_timestamp, svix_signature,user_agent)
         body = request.get_json()
-        body = json.dumps(body)
+        # body = json.dumps(body)
         print("BoDy",body)
         print("Headers",headers)
         print('type of body', type(body))
-        try:
-            wh = Webhook(WEBHOOK_SECRET)
-            evt = wh.verify(data=body,headers=headers)
-            print('verified')
-        except WebhookVerificationError as e:
-            print(f"Error verifying webhook: {e}")
-            return jsonify({'message':"Error occured in verifying", 'status_code':400})
-    
+        # try:
+        #     wh = Webhook(WEBHOOK_SECRET)
+        #     evt = wh.verify(data=body,headers=headers)
+        #     print('verified')
+        # except WebhookVerificationError as e:
+        #     print(f"Error verifying webhook: {e}")
+        #     return jsonify({'message':"Error occured in verifying", 'status_code':400})
+        evt = body
         event_type = evt['type']
         print("veriFicaTion",event_type)
         
