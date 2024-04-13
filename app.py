@@ -167,7 +167,7 @@ def handle_webhook():
         #     print(f"Error verifying webhook: {e}")
         #     return jsonify({'message':"Error occured in verifying", 'status_code':400})
     
-        event_type = body.type
+        event_type = body['type']
         print("veriFicaTion",event_type)
         
         
