@@ -70,7 +70,7 @@ def update_user(user_id, user_data):
 def delete_user(user_id):
     """Delete a user based on Clerk's user ID."""
     result = db.users.delete_one({'clerk_id': user_id})
-    return result.deleted_count > 0  # Return True if a user was deleted
+    return True  # Return True if a user was deleted
 
 
 
