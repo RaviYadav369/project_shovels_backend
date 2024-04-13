@@ -8,7 +8,7 @@ from modules.mongodb import (
     save_email_db, login_user, save_document, get_document, delete_document, 
     register_user, get_user, get_all_users, save_transcripts, save_channel, 
     get_channels, delete_channel_db, add_session, get_all_sessions, get_session, 
-    delete_session, get_history, update_user, delete_user,register_user    
+    delete_session, get_history, update_user, delete_user,register_user,delete_all_sessions  
 )
 from modules.ai_tools import get_video_links, make_transcript
 from werkzeug.utils import secure_filename
@@ -159,30 +159,36 @@ def handle_webhook():
         print("BoDy",body)
         print("Headers",headers)
         
-        try:
-            wh = Webhook(WEBHOOK_SECRET)
-            evt = wh.verify(data=body,headers=headers)
-            print('verified')
-        except WebhookVerificationError as e:
-            print(f"Error verifying webhook: {e}")
-            return jsonify({'message':"Error occured in verifying", 'status_code':400})
+        # try:
+        #     wh = Webhook(WEBHOOK_SECRET)
+        #     evt = wh.verify(data=body,headers=headers)
+        #     print('verified')
+        # except WebhookVerificationError as e:
+        #     print(f"Error verifying webhook: {e}")
+        #     return jsonify({'message':"Error occured in verifying", 'status_code':400})
     
-        event_type = evt.type
+        event_type = body.type
         print("veriFicaTion",event_type)
-        print(evt)
+        # print(evt)
         
-        # if event_type == "user.created":
-        #     # Extract relevant information
-        #     clerk_id = evt.data["id"]
-        #     email = evt.data["email_addresses"][0]["email_address"]
-        #     first_name = evt.data["first_name"]
-        #     last_name = evt.data["last_name"]
-        #     profile_image_url = evt.data.get("profile_image_url", "")
+        if event_type == "user.created":
+            # Extract relevant information
+            clerk_id = body.data["id"]
+            email = body.data["email_addresses"][0]["email_address"]
+            first_name = body.data["first_name"]
+            last_name = body.data["last_name"]
+            profile_image_url = body.data.get("profile_image_url", "")
 
-        #     # Use the register_user function to insert/update the user in the database
-        #     user_id = register_user(clerk_id, email, first_name, last_name, profile_image_url)
+            # Use the register_user function to insert/update the user in the database
+            user_id = register_user(clerk_id, email, first_name, last_name, profile_image_url)
+            return jsonify({'message': "User created event processed successfully", 'user_id': user_id, 'status_code': 200})
+        
+        elif event_type == 'user.delete':
+            clerk_id =body.data['id']
+            user_id = delete_user(clerk_id)
+            return jsonify({'message': "User delete event processed successfully", 'status_code': 200})
             
-        #     return jsonify({'message': "User created event processed successfully", 'user_id': user_id, 'status_code': 200})
+            
     except Exception as e:
           print("Error Occured",e)
           return jsonify({'message': "Error occurred", 'status_code' : 400})
@@ -340,14 +346,14 @@ def add_channel():
             transcript = make_transcript(i)
             ans=save_transcripts(user_id,transcript,str(channel_id))
         print("transcript generated")
-        add_chat_in_db=add_session(user_id,channel_id)
+        add_chat_in_db=add_session(user_id,channel_id,channel_url)
         if add_chat_in_db:
             print("session added")
     except Exception as e:
         print(f"Error adding channel: {e}")
         return jsonify({'success': False})
     # return channel id
-    return jsonify({'success': True, 'channel_id': str(channel_id)})
+    return jsonify({'success': True, 'channel_id': str(channel_id),'session_id':add_chat_in_db})
     
     # list of channels for a user
 @app.route('/channels', methods=['POST'])
@@ -403,8 +409,9 @@ def new_chat():
     # take user id from request
     user_id = request.json['user_id']
     # random channel id*********************
+    
     channel_id = str(uuid.uuid4())  # Generate a unique channel ID
-    session_id=add_session(user_id,channel_id)
+    session_id=add_session(user_id,channel_id,channel_url='')
     return jsonify({'success': True, 'sessionId': session_id,'channelId':channel_id})
 
 # delete chat for a user and channel
@@ -416,6 +423,17 @@ def delete_session_chat():
    
     # get chats
     success = delete_session(session_id)
+    return jsonify({'success': success})
+
+# delete all chats for a user
+@app.route('/delete_all_chats', methods=['POST'])
+@cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
+def delete_history():
+    # take user id from request
+    user_id = request.json['user_id']
+   
+    # get chats
+    success = delete_all_sessions(user_id)
     return jsonify({'success': success})
 
 

@@ -24,6 +24,7 @@ client = OpenAI(
 
 def get_transcripts(user_id:str, channel_id:str) -> str:
     """Get all transcripts of videos from the target youtube channel"""
+    
     if channel_id=='000000' or channel_id=='-101':
         return "No transcripts found for this channel, please continue with the conversation."
     if not user_id:
@@ -32,7 +33,7 @@ def get_transcripts(user_id:str, channel_id:str) -> str:
         return "Please provide your channel_id"
     transcripts = get_all_transcript(user_id,channel_id)
     if not transcripts:
-        return "No transcripts found for this channel, please continue with the conversation.1111111"
+        return "No transcripts found for this channel, please continue with the conversation"
     return transcripts
 
 def get_chatbot_response_agent(query, user_id,channel_id,session_id, history=None):
@@ -59,7 +60,7 @@ def get_chatbot_response_agent(query, user_id,channel_id,session_id, history=Non
                     history["messages"].append({'role': 'user', 'content': content})
 
         else:
-            starter_message = "Your AI Assistant, feel free to share anything.111111"
+            starter_message = "Your AI Assistant, feel free to share anything"
             msg.append(AIMessage(content=starter_message))
             history["messages"].append({'role': 'assistant', 'content': starter_message})
     except Exception as e:

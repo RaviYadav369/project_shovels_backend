@@ -43,34 +43,18 @@ def login_user(email, password):
 
 
 def register_user(clerk_id, email, first_name, last_name, profile_image_url):
-    existing_user = db.users.find_one({'clerk_id': clerk_id})
-    if existing_user:
-        print(f"Updating existing user: {clerk_id}")  # Debug statement
-        # Update existing user
-        update_result = db.users.update_one(
-            {'clerk_id': clerk_id},
-            {'$set': {
-                'first_name': first_name,
-                'last_name': last_name,
-                'email': email,
-                'profile_image_url': profile_image_url
-            }}
-        )
-        print(f"Update operation result: {update_result.modified_count} documents modified.")  # Debug statement
-        return str(existing_user['_id'])  # Return the existing user's ID
-    else:
-        print(f"Inserting new user: {clerk_id}")  # Debug statement
-        # Insert new user
-        result = db.users.insert_one({
-            'clerk_id': clerk_id,
-            'first_name': first_name,
-            'last_name': last_name,
-            'email': email,
-            'profile_image_url': profile_image_url,
-            'role': 'user'  # Default role, adjust as necessary
-        })
-        print(f"New user inserted with ID: {result.inserted_id}")  # Debug statement
-        return str(result.inserted_id)
+    print(f"Inserting new user: {clerk_id}")  # Debug statement
+    # Insert new user
+    result = db.users.insert_one({
+        'clerk_id': clerk_id,
+        'first_name': first_name,
+        'last_name': last_name,
+        'email': email,
+        'profile_image_url': profile_image_url,
+        'role': 'user'  # Default role, adjust as necessary
+    })
+    print(f"New user inserted with ID: {result.inserted_id}")  # Debug statement
+    return str(result.inserted_id)
 
 
 def update_user(user_id, user_data):
@@ -161,7 +145,7 @@ def save_channel(user_id,channel_url):
     return ans.inserted_id
 
 def get_channels(user_id):
-    channels = db.channels.find({'user_id': user_id})
+    channels = db.channels.find({'user_id': user_id}).sort("time_field", -1)
     channels = list(channels)
     for channel in channels:
         channel['_id'] = str(channel['_id'])
@@ -191,9 +175,9 @@ def delete_channel_db(channel_id):
         return False
     
 # chat id using userid and channel id and history
-def add_session(user_id, channel_id):
+def add_session(user_id, channel_id,channel_url):
     try:
-        result = db.sessions.insert_one({'user_id': user_id, 'channel_id': channel_id})
+        result = db.sessions.insert_one({'user_id': user_id, 'channel_id': channel_id, 'channel_url':channel_url})
         session_id = result.inserted_id  # Get the inserted ID
         return str(session_id)  # Return the session ID as a string
     except Exception as e:
@@ -204,7 +188,7 @@ def add_session(user_id, channel_id):
 def get_session(user_id,channel_id):
     try:
         user_id = ObjectId(user_id)
-        chat = db.sessions.find_one({'user_id': user_id,'channel_id':channel_id})
+        chat = db.sessions.find_one({'user_id': user_id,'channel_id':channel_id}).sort("time_field", -1)
         if chat:
             chat['_id'] = str(chat['_id'])
             return chat
@@ -232,7 +216,18 @@ def delete_session(session_id):
     except Exception as e:
         print(f"Error deleting session: {e}")
         return False
-    
+ 
+def delete_all_sessions(user_id):
+    try:
+        db.sessions.delete_many({'user_id': user_id})
+        # db.channels.delete_many({'user_id': user_id})
+        # db.transcripts.delete_many({'channel_id': channel_id})
+        db.history.delete_many({'user_id':user_id})
+        return True
+    except Exception as e:
+        print(f"Error deleting session: {e}")
+        return False
+ 
 
 def get_history(session_id,user_id):
     try:
