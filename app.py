@@ -191,8 +191,8 @@ def handle_webhook():
           print("Error Occured",e)
           return jsonify({'message': "Error occurred", 'status_code' : 400})
       
-def hmac_data(key: bytes, data: bytes) -> bytes:
-    return hmac.new(key, data, hashlib.sha256).digest()
+# def hmac_data(key: bytes, data: bytes) -> bytes:
+#     return hmac.new(key, data, hashlib.sha256).digest()
 
 
 class WebhookVerificationError(Exception):
