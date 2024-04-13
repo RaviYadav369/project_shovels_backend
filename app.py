@@ -179,17 +179,17 @@ def handle_webhook():
 
             # Use the register_user function to insert/update the user in the database
             user_id = register_user(clerk_id, email, first_name, last_name, profile_image_url)
-            return jsonify({'message': "User created event processed successfully", 'user_id': user_id, 'status_code': 200})
+            return jsonify({'success':True ,'message': "User created event processed successfully", 'user_id': user_id, 'status_code': 200})
         
         elif event_type == 'user.delete':
             clerk_id = body['data']['id']
             user_id = delete_user(clerk_id)
-            return jsonify({'message': "User delete event processed successfully", 'status_code': 200})
+            return jsonify({'success':True , 'message': "User delete event processed successfully", 'status_code': 200})
             
             
     except Exception as e:
           print("Error Occured",e)
-          return jsonify({'message': "Error occurred", 'status_code' : 400})
+          return jsonify({'success':True ,'message': "Error occurred", 'status_code' : 400})
       
 # def hmac_data(key: bytes, data: bytes) -> bytes:
 #     return hmac.new(key, data, hashlib.sha256).digest()
