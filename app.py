@@ -232,6 +232,7 @@ class Webhook:
         timestamp = self.__verify_timestamp(msg_timestamp)
 
         expected_sig = base64.b64decode(self.sign(msg_id=msg_id, timestamp=timestamp, data=data).split(",")[1])
+        print('comming From the signaTure',self.sign(msg_id=msg_id, timestamp=timestamp, data=data).split(",")[1])
         passed_sigs = msg_signature.split(" ")
         
         for versioned_sig in passed_sigs:
@@ -247,6 +248,7 @@ class Webhook:
 
     def sign(self, msg_id: str, timestamp: datetime, data: str) -> str:
         timestamp_str = str(floor(timestamp.replace(tzinfo=timezone.utc).timestamp()))
+        print('from siGn:',msg_id,timedelta,timestamp_str)
         to_sign = f"{msg_id}.{timestamp_str}.{data}".encode()
         signature = hmac_data(self._whsecret, to_sign)
         return f"v1,{base64.b64encode(signature).decode('utf-8')}"
