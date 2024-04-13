@@ -1,21 +1,10 @@
 {
+  "version": 2,
   "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "install-yt-dlp.sh",
-      "env": {
-        "YT_DLP_VERSION": "2023.7.22",
-        "FLASK_APP": "my_flask_app.py"
-      }
-    }
+    { "src": "app.py", "use": "@vercel/python" },
+    { "src": "install-yt-dlp.sh", "runs": "shell" }
   ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "my_flask_app.py"
-    }
+    { "src": "/(.*)", "dest": "app.py" }
   ]
 }
