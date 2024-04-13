@@ -170,14 +170,12 @@ def handle_webhook():
         
         
         if event_type == "user.created":
-            # Extract relevant information
             clerk_id = evt['data']["id"]
             email = evt['data']["email_addresses"][0]["email_address"]
             first_name = body['data']["first_name"]
             last_name = body['data']["last_name"]
             profile_image_url = body['data']['image_url']
 
-            # Use the register_user function to insert/update the user in the database
             user_id = register_user(clerk_id, email, first_name, last_name, profile_image_url)
             return jsonify({'success':True ,'message': "User created event processed successfully", 'user_id': user_id, 'status_code': 200})
         
