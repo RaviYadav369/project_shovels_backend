@@ -228,9 +228,9 @@ class Webhook:
             msg_timestamp = headers.get("webhook-timestamp")
             if not (msg_id and msg_timestamp and msg_signature):
                 raise WebhookVerificationError("Missing required headers")
-        print('Inside Verify function',msg_id,msg_signature, msg_timestamp)
         timestamp = self.__verify_timestamp(msg_timestamp)
 
+        print('Inside Verify function',msg_id,msg_signature, msg_timestamp)
         expected_sig = base64.b64decode(self.sign(msg_id=msg_id, timestamp=timestamp, data=data).split(",")[1])
         print('comming From the signaTure',self.sign(msg_id=msg_id, timestamp=timestamp, data=data).split(",")[1])
         passed_sigs = msg_signature.split(" ")
@@ -248,8 +248,9 @@ class Webhook:
 
     def sign(self, msg_id: str, timestamp: datetime, data: str) -> str:
         timestamp_str = str(floor(timestamp.replace(tzinfo=timezone.utc).timestamp()))
-        print('from siGn:',self._whsecret,msg_id,timestamp_str,data)
+        print('from siGn:',self._whsecret,msg_id,timestamp_str)
         to_sign = f"{msg_id}.{timestamp_str}.{data}".encode()
+        print('from sign function to_sign',to_sign)
         signature = hmac_data(self._whsecret, to_sign)
         print('this is generated signature',signature)
         return f"v1,{base64.b64encode(signature).decode('utf-8')}"
