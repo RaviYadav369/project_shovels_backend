@@ -250,7 +250,7 @@ class Webhook:
         timestamp_str = str(floor(timestamp.replace(tzinfo=timezone.utc).timestamp()))
         print('from siGn:',self._whsecret,msg_id,timestamp_str)
         to_sign = f"{msg_id}.{timestamp_str}.{data}".encode()
-        print('from sign function to_sign',to_sign)
+        # print('from sign function to_sign',to_sign)
         signature = hmac_data(self._whsecret, to_sign)
         print('this is generated signature',signature)
         return f"v1,{base64.b64encode(signature).decode('utf-8')}"
