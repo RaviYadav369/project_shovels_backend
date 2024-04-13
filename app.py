@@ -228,13 +228,13 @@ class Webhook:
             msg_timestamp = headers.get("webhook-timestamp")
             if not (msg_id and msg_timestamp and msg_signature):
                 raise WebhookVerificationError("Missing required headers")
-        print('Inside Verify function',msg_id,msg_signature, msg_signature)
+        print('Inside Verify function',msg_id,msg_signature, msg_timestamp)
         timestamp = self.__verify_timestamp(msg_timestamp)
 
         expected_sig = base64.b64decode(self.sign(msg_id=msg_id, timestamp=timestamp, data=data).split(",")[1])
         print('comming From the signaTure',self.sign(msg_id=msg_id, timestamp=timestamp, data=data).split(",")[1])
         passed_sigs = msg_signature.split(" ")
-        
+        print('In verify check signature',self._whsecret)
         for versioned_sig in passed_sigs:
             (version, signature) = versioned_sig.split(",")
             if version != "v1":
