@@ -230,16 +230,14 @@ class Webhook:
         timestamp = self.__verify_timestamp(msg_timestamp)
 
         print('Inside Verify function',msg_id,msg_signature, msg_timestamp)
-        expected_sig = base64.b64decode(self.sign(msg_id=msg_id, timestamp=timestamp, data=data.encode()).split(",")[1])
-        print('comming From the signaTure',self.sign(msg_id=msg_id, timestamp=timestamp, data=data.encode()).split(",")[1])
+        to_sign = f"{msg_id}.{timestamp}".encode()
         passed_sigs = msg_signature.split(" ")
         for versioned_sig in passed_sigs:
             (version, signature) = versioned_sig.split(",")
             if version != "v1":
                 continue
             sig_bytes = base64.b64decode(signature)
-            print("SiGn ;",sig_bytes,expected_sig)
-            if hmac.compare_digest(expected_sig, sig_bytes):
+            if Webhook.generateSignature(self._whsecret, to_sign) == sig_bytes:
                 return json.loads(data)
 
         raise WebhookVerificationError("No matching signature found")
