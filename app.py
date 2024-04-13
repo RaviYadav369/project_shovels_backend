@@ -155,10 +155,10 @@ def handle_webhook():
 
         print('svix ids',svix_id, svix_timestamp, svix_signature,user_agent)
         body = request.get_json()
-        body = json.dumps(body)
+        # body = json.dumps(body)
         print("BoDy",body)
         print("Headers",headers)
-        
+        print('type of body', type(body))
         # try:
         #     wh = Webhook(WEBHOOK_SECRET)
         #     evt = wh.verify(data=body,headers=headers)
@@ -169,7 +169,7 @@ def handle_webhook():
     
         event_type = body.type
         print("veriFicaTion",event_type)
-        # print(evt)
+        
         
         if event_type == "user.created":
             # Extract relevant information
@@ -192,6 +192,7 @@ def handle_webhook():
     except Exception as e:
           print("Error Occured",e)
           return jsonify({'message': "Error occurred", 'status_code' : 400})
+      
 def hmac_data(key: bytes, data: bytes) -> bytes:
     return hmac.new(key, data, hashlib.sha256).digest()
 
