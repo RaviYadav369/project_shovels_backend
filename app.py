@@ -248,9 +248,10 @@ class Webhook:
 
     def sign(self, msg_id: str, timestamp: datetime, data: str) -> str:
         timestamp_str = str(floor(timestamp.replace(tzinfo=timezone.utc).timestamp()))
-        print('from siGn:',msg_id,timedelta,timestamp_str)
+        print('from siGn:',self._whsecret,msg_id,timestamp_str,data)
         to_sign = f"{msg_id}.{timestamp_str}.{data}".encode()
         signature = hmac_data(self._whsecret, to_sign)
+        print('this is generated signature',signature)
         return f"v1,{base64.b64encode(signature).decode('utf-8')}"
 
     def __verify_timestamp(self, timestamp_header: str) -> datetime:
