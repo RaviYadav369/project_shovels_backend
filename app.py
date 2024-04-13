@@ -159,32 +159,32 @@ def handle_webhook():
         print("BoDy",body)
         print("Headers",headers)
         print('type of body', type(body))
-        # try:
-        #     wh = Webhook(WEBHOOK_SECRET)
-        #     evt = wh.verify(data=body,headers=headers)
-        #     print('verified')
-        # except WebhookVerificationError as e:
-        #     print(f"Error verifying webhook: {e}")
-        #     return jsonify({'message':"Error occured in verifying", 'status_code':400})
+        try:
+            wh = Webhook(WEBHOOK_SECRET)
+            evt = wh.verify(data=body,headers=headers)
+            print('verified')
+        except WebhookVerificationError as e:
+            print(f"Error verifying webhook: {e}")
+            return jsonify({'message':"Error occured in verifying", 'status_code':400})
     
-        event_type = body['type']
+        event_type = evt['type']
         print("veriFicaTion",event_type)
         
         
         if event_type == "user.created":
             # Extract relevant information
-            clerk_id = body.data["id"]
-            email = body.data["email_addresses"][0]["email_address"]
-            first_name = body.data["first_name"]
-            last_name = body.data["last_name"]
-            profile_image_url = body.data.get("profile_image_url", "")
+            clerk_id = evt['data']["id"]
+            email = evt['data']["email_addresses"][0]["email_address"]
+            first_name = body['data']["first_name"]
+            last_name = body['data']["last_name"]
+            profile_image_url = body['data']['image_url']
 
             # Use the register_user function to insert/update the user in the database
             user_id = register_user(clerk_id, email, first_name, last_name, profile_image_url)
             return jsonify({'message': "User created event processed successfully", 'user_id': user_id, 'status_code': 200})
         
         elif event_type == 'user.delete':
-            clerk_id =body.data['id']
+            clerk_id = body['data']['id']
             user_id = delete_user(clerk_id)
             return jsonify({'message': "User delete event processed successfully", 'status_code': 200})
             
