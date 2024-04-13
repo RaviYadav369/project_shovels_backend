@@ -214,6 +214,7 @@ class Webhook:
         if isinstance(whsecret, bytes):
             self._whsecret = whsecret
         print('seCret is ',whsecret)
+
     def verify(self, data: t.Union[bytes, str], headers: t.Dict[str, str]) -> t.Any:
         data = data if isinstance(data, str) else data.decode()
         headers = {k.lower(): v for (k, v) in headers.items()}
@@ -229,8 +230,8 @@ class Webhook:
         timestamp = self.__verify_timestamp(msg_timestamp)
 
         print('Inside Verify function',msg_id,msg_signature, msg_timestamp)
-        expected_sig = base64.b64decode(self.sign(msg_id=msg_id, timestamp=timestamp, data=data).split(",")[1])
-        print('comming From the signaTure',self.sign(msg_id=msg_id, timestamp=timestamp, data=data).split(",")[1])
+        expected_sig = base64.b64decode(self.sign(msg_id=msg_id, timestamp=timestamp, data=data.encode()).split(",")[1])
+        print('comming From the signaTure',self.sign(msg_id=msg_id, timestamp=timestamp, data=data.encode()).split(",")[1])
         passed_sigs = msg_signature.split(" ")
         for versioned_sig in passed_sigs:
             (version, signature) = versioned_sig.split(",")
@@ -243,6 +244,7 @@ class Webhook:
 
         raise WebhookVerificationError("No matching signature found")
 
+    @staticmethod
     def generateSignature(whsecret, toSign):
         hmac = hmac.new(whsecret.encode(), toSign.encode(), digestmod=hashlib.sha256)
         signature = hmac.digest()
@@ -269,7 +271,6 @@ class Webhook:
         if timestamp > (now + webhook_tolerance):
             raise WebhookVerificationError("Message timestamp too new")
         return timestamp
-
 # login
 @app.route('/login', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
