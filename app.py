@@ -204,6 +204,7 @@ class Webhook:
     _whsecret: bytes
 
     def __init__(self, whsecret: t.Union[str, bytes]):
+        
         if not whsecret:
             raise RuntimeError("Secret can't be empty.")
 
@@ -214,7 +215,7 @@ class Webhook:
 
         if isinstance(whsecret, bytes):
             self._whsecret = whsecret
-
+        print('seCret is ',whsecret)
     def verify(self, data: t.Union[bytes, str], headers: t.Dict[str, str]) -> t.Any:
         data = data if isinstance(data, str) else data.decode()
         headers = {k.lower(): v for (k, v) in headers.items()}
@@ -227,7 +228,7 @@ class Webhook:
             msg_timestamp = headers.get("webhook-timestamp")
             if not (msg_id and msg_timestamp and msg_signature):
                 raise WebhookVerificationError("Missing required headers")
-
+        print('Inside Verify function',msg_id,msg_signature, msg_signature)
         timestamp = self.__verify_timestamp(msg_timestamp)
 
         expected_sig = base64.b64decode(self.sign(msg_id=msg_id, timestamp=timestamp, data=data).split(",")[1])
