@@ -181,7 +181,7 @@ def handle_webhook():
             user_id = register_user(clerk_id, email, first_name, last_name, profile_image_url)
             return jsonify({'success':True ,'message': "User created event processed successfully", 'user_id': user_id, 'status_code': 200})
         
-        elif event_type == 'user.delete':
+        elif event_type == 'user.deleted':
             clerk_id = body['data']['id']
             user_id = delete_user(clerk_id)
             return jsonify({'success':True , 'message': "User delete event processed successfully", 'status_code': 200})
