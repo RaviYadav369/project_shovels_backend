@@ -2,6 +2,8 @@ from pymongo import MongoClient
 from dotenv import load_dotenv, find_dotenv
 import os
 from bson import ObjectId
+from datetime import datetime
+import pytz
 
 load_dotenv(find_dotenv())
 
@@ -177,7 +179,8 @@ def delete_channel_db(channel_id):
 # chat id using userid and channel id and history
 def add_session(user_id, channel_id,channel_url):
     try:
-        result = db.sessions.insert_one({'user_id': user_id, 'channel_id': channel_id, 'channel_url':channel_url})
+        utc_tz = pytz.UTC
+        result = db.sessions.insert_one({'user_id': user_id, 'channel_id': channel_id, 'channel_url':channel_url,'timestamp': datetime.now(utc_tz)})
         session_id = result.inserted_id  # Get the inserted ID
         return str(session_id)  # Return the session ID as a string
     except Exception as e:
