@@ -1,7 +1,7 @@
-yt-dlp==2023.7.6
+yt-dlp>=2024.04.09
 langchain==0.0.334
 openai==1.7.1
-pymongo==4.6.0
+pymongo>=4.6.3
 python-dotenv==1.0.0
 flask-cors==4.0.0
 flask==2.3.2
