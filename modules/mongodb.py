@@ -186,7 +186,23 @@ def add_session(user_id, channel_id,channel_url):
     except Exception as e:
         print(f"Error adding chat session: {e}")
         return None
-
+    
+def update_session(user_id, channel_id, chatDetails):
+    try:
+        utc_tz = pytz.UTC
+        update = {
+            '$set': {
+                'user_id': user_id,
+                'channel_id': channel_id,
+                'chatDetails': chatDetails,
+                'timestamp': datetime.now(utc_tz)
+            }
+        }
+        result = db.sessions.find_one_and_update({'user_id': user_id, 'channel_id': channel_id},update, upsert=True, new=True)
+        return True  
+    except Exception as e:
+        print(f"Error adding chat session: {e}")
+        return None
 # get chat using userid and channel id
 def get_session(user_id,channel_id):
     try:

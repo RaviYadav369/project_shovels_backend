@@ -11,7 +11,8 @@ from langchain.tools import StructuredTool
 from langchain.llms import OpenAI
 from modules.ai_tools import get_all_transcript
 from langchain.llms import OpenAI
-from modules.mongodb import get_history,set_history
+from modules.mongodb import get_history,set_history,update_session
+
 import os
 from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())
@@ -121,6 +122,9 @@ def get_chatbot_response_agent(query, user_id,channel_id,session_id, history=Non
 
     # Update the user's history in the database
     print("HisTORY_MEssage",history)
+    chatDetails = history['messages'][1]['content']
+    print(chatDetails)
+    update_sess = update_session(user_id,channel_id,chatDetails)
     va =  set_history(session_id, history,user_id)
 
 
