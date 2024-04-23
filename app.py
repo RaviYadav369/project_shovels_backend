@@ -21,7 +21,6 @@ import json
 from svix.webhooks import Webhook, WebhookVerificationError
 import os
 import json
-import hmac
 import base64
 import hashlib
 from datetime import datetime
