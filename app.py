@@ -239,7 +239,8 @@ def users():
     # get all
     users = get_all_users()
     return jsonify({'success': True, 'users': users})
-    
+
+import subprocess
 # add youtube channel
 @app.route('/add_channel', methods=['POST'])
 @cross_origin(origin='*', headers=['Content-Type', 'Authorization'])
@@ -249,6 +250,11 @@ def add_channel():
     user_id = request.json['user_id']
     # save channelurl in db
     channel_id=save_channel(user_id,channel_url)
+    try:
+        subprocess.run(["yt-dlp", "--version"], check=True)
+        print("yt-dlp is installed and working")
+    except FileNotFoundError:
+        print("yt-dlp is not installed or not in the system path")
 
     # get video links
     try:
@@ -516,15 +522,6 @@ def documents():
 
     return jsonify({'success': True, 'documents': documents})
 
-import subprocess
-
-def verify_yt_dlp():
-    try:
-        subprocess.run(["yt-dlp", "--version"], check=True)
-        print("yt-dlp is installed and working")
-    except FileNotFoundError:
-        print("yt-dlp is not installed or not in the system path")
 
 if __name__ == '__main__':
-    verify_yt_dlp()
     app.run(host='0.0.0.0',debug=True,threaded=True,use_reloader=False)
