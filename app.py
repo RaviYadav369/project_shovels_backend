@@ -247,13 +247,13 @@ def add_channel():
     # take channel url from request
     channel_url = request.json['channel_url']
     user_id = request.json['user_id']
-
     # save channelurl in db
     channel_id=save_channel(user_id,channel_url)
 
     # get video links
     try:
         links = get_video_links(str(channel_url))
+        print("links 256",links)
         links=links[:5]
         # make transcript
         print("generating transcript for channel")
