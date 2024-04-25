@@ -14,7 +14,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def get_video_links(channel_url, max_links=5):
     command = [
-        "yt-dlp",
+        "youtube-dl",
         "--flat-playlist",
         "--yes-playlist",
         "--get-id",
