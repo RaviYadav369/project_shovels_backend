@@ -516,7 +516,15 @@ def documents():
 
     return jsonify({'success': True, 'documents': documents})
 
+import subprocess
 
+def verify_yt_dlp():
+    try:
+        subprocess.run(["yt-dlp", "--version"], check=True)
+        print("yt-dlp is installed and working")
+    except FileNotFoundError:
+        print("yt-dlp is not installed or not in the system path")
 
 if __name__ == '__main__':
+    verify_yt_dlp()
     app.run(host='0.0.0.0',debug=True,threaded=True,use_reloader=False)
