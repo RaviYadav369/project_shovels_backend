@@ -2,6 +2,13 @@
   "version": 2,
   "builds": [
     {
+      "src": "check-yt-dlp.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb"
+      }
+    },
+    {
       "src": "app.py",
       "use": "@vercel/python",
       "config": {
