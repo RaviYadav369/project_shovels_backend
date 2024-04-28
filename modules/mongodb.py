@@ -198,7 +198,7 @@ def update_session(user_id, channel_id, chatDetails):
                 'timestamp': datetime.now(utc_tz)
             }
         }
-        result = db.sessions.find_one_and_update({'user_id': user_id, 'channel_id': channel_id},update, upsert=True, new=True)
+        result = db.sessions.find_one_and_update({'user_id': user_id, 'channel_id': channel_id},update)
         return True  
     except Exception as e:
         print(f"Error adding chat session: {e}")

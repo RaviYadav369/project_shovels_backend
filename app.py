@@ -250,11 +250,6 @@ def add_channel():
     user_id = request.json['user_id']
     # save channelurl in db
     channel_id=save_channel(user_id,channel_url)
-    try:
-        subprocess.run(["yt-dlp", "--version"], check=True)
-        print("yt-dlp is installed and working")
-    except FileNotFoundError:
-        print("yt-dlp is not installed or not in the system path")
 
     # get video links
     try:
