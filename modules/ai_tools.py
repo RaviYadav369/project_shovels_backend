@@ -13,7 +13,6 @@ api_key  = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 youtube_api_key= os.getenv("YOUTUBE_API_KEY")
 
-from urllib.parse import urlparse
 from googleapiclient.discovery import build
 
 
