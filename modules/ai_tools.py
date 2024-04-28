@@ -1,8 +1,6 @@
 import subprocess
 import requests
 
-from pytube import Channel
-
 from langchain.document_loaders import YoutubeLoader
 from modules.mongodb import get_all_transcripts
 
