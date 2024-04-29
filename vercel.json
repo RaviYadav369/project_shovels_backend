@@ -11,5 +11,11 @@
   ],
   "routes": [
     { "src": "/(.*)", "dest": "app.py" }
-  ]
+  ],
+  "functions": {
+    "my-function": {
+      "handler": "handler.main",
+      "memory": "500"
+    }
+  }
 }
