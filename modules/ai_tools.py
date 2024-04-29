@@ -15,7 +15,6 @@ youtube_api_key= os.getenv("YOUTUBE_API_KEY")
 
 from googleapiclient.discovery import build
 
-
 def get_video_links(channel_url):
      # Replace with your YouTube Data API key
     youtube = build('youtube', 'v3', developerKey=youtube_api_key)
