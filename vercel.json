@@ -13,9 +13,8 @@
     { "src": "/(.*)", "dest": "app.py" }
   ],
   "functions": {
-    "my-function": {
-      "handler": "handler.main",
-      "memory": "500"
+    "app.py": {
+      "memory": "3009"
     }
   }
 }
