@@ -14,7 +14,7 @@
   ],
   "functions": {
     "app.py": {
-      "memory": "3009"
+      "memory": 1024
     }
   }
 }
