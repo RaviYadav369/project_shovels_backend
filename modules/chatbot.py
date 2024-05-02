@@ -40,12 +40,10 @@ def get_transcripts(user_id:str, channel_id:str) -> str:
 def get_chatbot_response_agent(query, user_id,channel_id,session_id, history=None):
     if history is None:
         history = {"messages": []}
-    print("hIStory",history)
     msg = []
     # Process history messages
     try:
         history_records = get_history(session_id,user_id)
-        print("HISTORY_RECORDS",history_records)
         if history_records is None:
             history = {"messages": []}
         if history_records and "messages" in history_records["history"]:
@@ -109,7 +107,7 @@ def get_chatbot_response_agent(query, user_id,channel_id,session_id, history=Non
         verbose=True,
         return_intermediate_steps=True,
     )
-    print(msg)
+    # print(msg)
    # Append the AI response to the history
     response = agent_executor(
         {
@@ -121,9 +119,7 @@ def get_chatbot_response_agent(query, user_id,channel_id,session_id, history=Non
     history["messages"].append({'role': 'assistant', 'content': response["output"]})
 
     # Update the user's history in the database
-    print("HisTORY_MEssage",history)
     chatDetails = history['messages'][1]['content']
-    print(chatDetails)
     update_sess = update_session(user_id,channel_id,chatDetails)
     va =  set_history(session_id, history,user_id)
 
